@@ -1127,21 +1127,18 @@ class DatabaseManager:
         分析均线形态
         
         判断条件：
-        - 多头排列：close > ma5 > ma10 > ma20
-        - 空头排列：close < ma5 < ma10 < ma20
+        - 多头排列：ma5 > ma10 > ma20
+        - 空头排列：ma5 < ma10 < ma20
         - 震荡整理：其他情况
         """
-        # 注意：这里的均线形态判断基于“close/ma5/ma10/ma20”静态比较，
-        # 未考虑均线拐点、斜率、或不同数据源复权口径差异。
-        # 该行为目前保留（按需求不改逻辑）。
         close = data.close or 0
         ma5 = data.ma5 or 0
         ma10 = data.ma10 or 0
         ma20 = data.ma20 or 0
         
-        if close > ma5 > ma10 > ma20 > 0:
+        if ma5 > ma10 > ma20 > 0:
             return "多头排列 📈"
-        elif close < ma5 < ma10 < ma20 and ma20 > 0:
+        elif ma5 < ma10 < ma20 and ma20 > 0:
             return "空头排列 📉"
         elif close > ma5 and ma5 > ma10:
             return "短期向好 🔼"

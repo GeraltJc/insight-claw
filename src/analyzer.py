@@ -463,6 +463,7 @@ class GeminiAnalyzer:
 - 关注筹码集中度：90%集中度 < 15% 表示筹码集中
 - 获利比例分析：70-90% 获利盘时需警惕获利回吐
 - 平均成本与现价关系：现价高于平均成本 5-15% 为健康
+- 仅当提供了筹码分布数据时填写筹码数值；无筹码数据时必须标记为数据缺失，严禁推断或编造
 
 ### 4. 买点偏好（回踩支撑）
 - **最佳买点**：缩量回踩 MA5 获得支撑
@@ -484,6 +485,15 @@ class GeminiAnalyzer:
 ### 7. 强势趋势股放宽
 - 强势趋势股（多头排列且趋势强度高、量能配合）可适当放宽乖离率要求
 - 此类股票可轻仓追踪，但仍需设置止损，不盲目追高
+
+### 8. 量能解读边界
+- 没有资金流、盘口、龙虎榜或筹码数据时，只能描述量比、成交量变化、换手率等客观量价现象
+- 不得判断主力资金未出货、正常洗盘、主力吸筹或主力出货
+
+### 9. 大跌破短均线降级
+- 单日跌幅达到或超过5%，且收盘价低于MA5时，说明短线支撑尚未确认
+- 即使 MA5>MA10>MA20 或系统评分偏高，也不得直接给出买入/加仓；应降级为观望、持有或等待企稳后轻仓试探
+- 若输出狙击点，必须写明触发条件（如重新站回MA5、缩量企稳、次日不再创新低）
 
 ## 输出格式：决策仪表盘 JSON
 
@@ -564,7 +574,7 @@ class GeminiAnalyzer:
                 "✅/⚠️/❌ 检查项2：乖离率合理（强势趋势可放宽）",
                 "✅/⚠️/❌ 检查项3：量能配合",
                 "✅/⚠️/❌ 检查项4：无重大利空",
-                "✅/⚠️/❌ 检查项5：筹码健康",
+                "✅/⚠️/❌ 检查项5：筹码健康；无筹码数据时必须标记为数据缺失",
                 "✅/⚠️/❌ 检查项6：PE估值合理"
             ]
         }
@@ -594,13 +604,15 @@ class GeminiAnalyzer:
 }
 ```
 
+注意：无筹码数据时必须输出 "chip_structure": null，不得用估算值填充获利比例、平均成本或筹码集中度。
+
 ## 评分标准
 
 ### 强烈买入（80-100分）：
 - ✅ 多头排列：MA5 > MA10 > MA20
 - ✅ 低乖离率：<2%，最佳买点
 - ✅ 缩量回调或放量突破
-- ✅ 筹码集中健康
+- ✅ 筹码集中健康（仅限已提供筹码数据）
 - ✅ 消息面有利好催化
 
 ### 买入（60-79分）：
@@ -933,6 +945,7 @@ class GeminiAnalyzer:
                 result.search_performed = bool(news_context)
                 result.market_snapshot = self._build_market_snapshot(context)
                 result.model_used = model_used
+                self._apply_market_consistency_guards(result, context)
 
                 # 内容完整性校验（可选）
                 if not config.report_integrity_enabled:
@@ -981,6 +994,56 @@ class GeminiAnalyzer:
                 error_message=str(e),
                 model_used=None,
             )
+
+    @staticmethod
+    def _to_float(value: Any) -> Optional[float]:
+        """Convert numeric-ish values to float; return None when unavailable."""
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            if isinstance(value, float) and math.isnan(value):
+                return None
+            return float(value)
+        try:
+            text = str(value).strip().replace("%", "")
+            return float(text)
+        except (TypeError, ValueError):
+            return None
+
+    def _apply_market_consistency_guards(
+        self,
+        result: AnalysisResult,
+        context: Dict[str, Any],
+    ) -> None:
+        """Apply deterministic risk downgrades when LLM output conflicts with market data."""
+        if not result or result.decision_type != "buy":
+            return
+
+        today = context.get("today") or {}
+        close = self._to_float(today.get("close"))
+        ma5 = self._to_float(today.get("ma5"))
+        pct_chg = self._to_float(today.get("pct_chg"))
+        if close is None or ma5 is None or pct_chg is None:
+            return
+
+        if pct_chg > -5 or close >= ma5:
+            return
+
+        result.decision_type = "hold"
+        result.operation_advice = "观望"
+        result.confidence_level = "低"
+
+        if result.dashboard is None:
+            result.dashboard = {}
+        core = result.dashboard.setdefault("core_conclusion", {})
+        core["signal_type"] = "🟡持有观望"
+        core["time_sensitivity"] = core.get("time_sensitivity") or "不急"
+        core["one_sentence"] = "跌幅超过5%且收盘低于MA5，等待企稳确认"
+
+        battle = result.dashboard.setdefault("battle_plan", {})
+        checklist = battle.setdefault("action_checklist", [])
+        if isinstance(checklist, list):
+            checklist.append("⚠️ 检查项：跌幅超过5%且收盘低于MA5，买入结论已降级为观望")
     
     def _format_prompt(
         self, 
@@ -1071,6 +1134,12 @@ class GeminiAnalyzer:
 | 90%筹码集中度 | {chip.get('concentration_90', 0):.2%} | <15%为集中 |
 | 70%筹码集中度 | {chip.get('concentration_70', 0):.2%} | |
 | 筹码状态 | {chip.get('chip_status', '未知')} | |
+"""
+        else:
+            prompt += """
+### 筹码分布数据
+⚠️ 筹码分布数据缺失：未获取到获利比例、平均成本、筹码集中度等真实数据。
+在本次分析中不得推断或编造获利比例、平均成本、筹码集中度；`chip_structure` 必须输出为 null，检查清单中的筹码项必须标记为“数据缺失，无法判断”。
 """
         
         # 添加趋势分析结果（基于交易理念的预判）
@@ -1225,7 +1294,7 @@ class GeminiAnalyzer:
 1. ❓ 是否满足 MA5>MA10>MA20 多头排列？
 2. ❓ 当前乖离率是否在安全范围内（<5%）？—— 超过5%必须标注"严禁追高"
 3. ❓ 量能是否配合（缩量回调/放量突破）？
-4. ❓ 筹码结构是否健康？
+4. ❓ 筹码结构是否健康？若无筹码数据必须回答“数据缺失，无法判断”
 5. ❓ 消息面有无重大利空？（减持、处罚、业绩变脸等）
 
 ### 决策仪表盘要求：

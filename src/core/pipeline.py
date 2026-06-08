@@ -844,16 +844,16 @@ class StockAnalysisPipeline:
     @staticmethod
     def _compute_ma_status(close: float, ma5: float, ma10: float, ma20: float) -> str:
         """
-        Compute MA alignment status from price and MA values.
-        Logic mirrors storage._analyze_ma_status (Issue #234).
+        Compute MA alignment status from MA values.
+        Price position is handled separately by bias metrics.
         """
         close = close or 0
         ma5 = ma5 or 0
         ma10 = ma10 or 0
         ma20 = ma20 or 0
-        if close > ma5 > ma10 > ma20 > 0:
+        if ma5 > ma10 > ma20 > 0:
             return "多头排列 📈"
-        elif close < ma5 < ma10 < ma20 and ma20 > 0:
+        elif ma5 < ma10 < ma20 and ma20 > 0:
             return "空头排列 📉"
         elif close > ma5 and ma5 > ma10:
             return "短期向好 🔼"
