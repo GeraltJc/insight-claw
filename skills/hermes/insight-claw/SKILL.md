@@ -1,10 +1,12 @@
 ---
 name: insight-claw
-description: Download, configure, run, verify, and troubleshoot Insight Claw, an A-share self-selected stock analysis pipeline.
-version: 0.1.0
+description: Download, configure, run, verify, and troubleshoot Insight Claw from OpenClaw or Hermes, producing A-share self-selected stock analysis reports through the local JusticePlutus CLI.
+version: 0.2.0
 author: GeraltJc
-license: MIT
+license: MIT-0
 platforms: [macos, linux]
+compatibility: Cross-platform macOS/Linux skill for shell-capable OpenClaw and Hermes hosts. Requires git, Python 3.11+, pip, venv, network access, and at least one OpenAI-compatible LLM key for real structured analysis.
+allowed-tools: Bash Read
 metadata:
   hermes:
     tags: [Finance, A-Share, CLI, Analysis, Automation]
@@ -18,6 +20,66 @@ metadata:
         description: Default self-selected stocks for first validation runs.
         default: "000001,600519"
         prompt: Default stock codes for Insight Claw validation
+  openclaw:
+    emoji: "📈"
+    homepage: https://github.com/GeraltJc/insight-claw/tree/main/skills/hermes/insight-claw
+    requires:
+      bins:
+        - git
+        - python
+    primaryEnv: AIHUBMIX_KEY
+    envVars:
+      - name: AIHUBMIX_KEY
+        required: false
+        description: Recommended OpenAI-compatible AIHubMix key for structured analysis.
+      - name: OPENAI_API_KEY
+        required: false
+        description: OpenAI-compatible API key used as primary or fallback LLM credential.
+      - name: OPENAI_BASE_URL
+        required: false
+        description: Optional OpenAI-compatible base URL.
+      - name: OPENAI_MODEL
+        required: false
+        description: Optional model name for structured analysis.
+      - name: BOCHA_API_KEYS
+        required: false
+        description: Optional search intelligence provider key list.
+      - name: TAVILY_API_KEYS
+        required: false
+        description: Optional search intelligence provider key list.
+      - name: SERPAPI_API_KEYS
+        required: false
+        description: Optional search intelligence provider key list.
+      - name: TUSHARE_TOKEN
+        required: false
+        description: Optional market data enhancement token.
+      - name: ENABLE_CHIP_DISTRIBUTION
+        required: false
+        description: Optional switch for chip distribution enrichment.
+      - name: WENCAI_COOKIE
+        required: false
+        description: Optional chip distribution provider credential.
+      - name: HSCLOUD_AUTH_TOKEN
+        required: false
+        description: Optional chip distribution provider credential.
+      - name: IFIND_REFRESH_TOKEN
+        required: false
+        description: Optional TongHuaShun professional data credential.
+      - name: ENABLE_THS_PRO_DATA
+        required: false
+        description: Optional switch for TongHuaShun professional data mode.
+      - name: ENABLE_IFIND_ANALYSIS_ENHANCEMENT
+        required: false
+        description: Optional switch for iFinD-enhanced structured analysis.
+      - name: TELEGRAM_BOT_TOKEN
+        required: false
+        description: Optional Telegram notification credential.
+      - name: TELEGRAM_CHAT_ID
+        required: false
+        description: Optional Telegram notification target.
+      - name: FEISHU_WEBHOOK_URL
+        required: false
+        description: Optional Feishu notification webhook.
 required_environment_variables:
   - name: AIHUBMIX_KEY
     prompt: AIHubMix API key
@@ -34,7 +96,18 @@ Insight Claw 是面向 A 股自选股的自动化自选股分析流水线。它�
 
 ## When to Use
 
-Use this skill when a user wants Hermes Agent to download, configure, run, verify, or troubleshoot Insight Claw.
+Use this skill when a user wants OpenClaw or Hermes to download, configure, run, verify, or troubleshoot Insight Claw.
+
+## Host Compatibility
+
+This is a shell-based skill for agent hosts that can run local commands. It follows the same operational path in OpenClaw and Hermes:
+
+1. Reuse an existing Insight Claw checkout when one is present.
+2. Clone `https://github.com/GeraltJc/insight-claw` only for first-time setup.
+3. Create or reuse `.venv`.
+4. Run the local JusticePlutus CLI with a temporary `--stocks` self-selected stock override.
+
+Use OpenClaw for ClawHub installation and updates. Use Hermes when the user has already installed this skill in a Hermes skill path. Do not mix host-specific install flows in one turn; pick the host the user is actually using, then run the same local validation command.
 
 ## Quick Reference
 
@@ -54,9 +127,22 @@ For expanded commands, environment examples, GitHub Actions setup, and troublesh
 
 If the user is already inside an Insight Claw checkout, reuse it instead of cloning a duplicate repository.
 
+## OpenClaw Installation
+
+After this skill is published on ClawHub, OpenClaw users can install it from the registry:
+
+```bash
+openclaw skills search insight-claw
+openclaw skills install insight-claw
+```
+
+For local development before publication, point OpenClaw at this folder or copy the folder into the active OpenClaw skills directory. The skill bundle is this directory only: `SKILL.md` plus `references/`.
+
+OpenClaw metadata lives under `metadata.openclaw`. Optional provider keys are declared with `envVars` instead of `requires.env` because Insight Claw can run with either `AIHUBMIX_KEY` or `OPENAI_API_KEY`, and search, chip distribution, 同花顺专业数据模式, and notifications are enhancement paths rather than mandatory setup.
+
 ## Execution Contract
 
-Hermes should not clone and reinstall on every request. Use this decision flow:
+OpenClaw and Hermes should not clone and reinstall on every request. Use this decision flow:
 
 ### First-time setup
 
@@ -170,7 +256,16 @@ Use GitHub Actions only after the local flow is understood.
 
 ## Publishing
 
-This skill is intended for public Hermes distribution. Keep the bundle small: `SKILL.md` plus optional text references or small helper scripts only when they remove real repeated work.
+This skill is intended for public OpenClaw/ClawHub and Hermes distribution. Keep the bundle small: `SKILL.md` plus optional text references or small helper scripts only when they remove real repeated work.
+
+To publish to ClawHub:
+
+```bash
+clawhub login
+clawhub skill publish skills/hermes/insight-claw --slug insight-claw --name "Insight Claw" --version 0.2.0 --changelog "Add OpenClaw and ClawHub compatibility metadata while preserving Hermes usage."
+```
+
+ClawHub skill publications are distributed under MIT-0. Do not add conflicting license terms to this skill bundle.
 
 To publish to a Skills Hub:
 
@@ -184,7 +279,7 @@ To expose the repository as a custom tap:
 hermes skills tap add GeraltJc/insight-claw
 ```
 
-Before publishing, review the bundle as a community skill that will pass the Hermes security scanner:
+Before publishing, review the bundle as a community skill that will pass the ClawHub and Hermes security scanners:
 
 - Data exfiltration: do not upload reports, `.env` files, or generated artifacts without explicit user approval.
 - Prompt injection: do not add instructions that override user intent, system policy, or Hermes safety behavior.

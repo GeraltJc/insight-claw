@@ -21,15 +21,60 @@ def test_hermes_skill_declares_public_entrypoint_metadata():
 
     assert frontmatter["name"] == "insight-claw"
     assert "Insight Claw" in frontmatter["description"]
-    assert frontmatter["version"] == "0.1.0"
+    assert "OpenClaw" in frontmatter["description"]
+    assert "Hermes" in frontmatter["description"]
+    assert frontmatter["version"] == "0.2.0"
     assert frontmatter["author"]
-    assert frontmatter["license"]
+    assert frontmatter["license"] == "MIT-0"
     assert frontmatter["platforms"] == ["macos", "linux"]
+    assert "compatibility" in frontmatter
+    assert frontmatter["allowed-tools"] == "Bash Read"
     assert "hermes" in frontmatter["metadata"]
+    assert "openclaw" in frontmatter["metadata"]
     assert "When to Use" in body
+    assert "Host Compatibility" in body
     assert "Quick Reference" in body
     assert "Procedure" in body
     assert "Verification" in body
+
+
+def test_skill_declares_openclaw_runtime_metadata_for_clawhub():
+    frontmatter, body = _load_skill()
+
+    openclaw_metadata = frontmatter["metadata"]["openclaw"]
+
+    assert openclaw_metadata["homepage"].endswith("/skills/hermes/insight-claw")
+    assert openclaw_metadata["primaryEnv"] == "AIHUBMIX_KEY"
+    assert openclaw_metadata["requires"]["bins"] == ["git", "python"]
+    assert "env" not in openclaw_metadata["requires"]
+
+    env_vars = {item["name"]: item for item in openclaw_metadata["envVars"]}
+    for env_name in [
+        "AIHUBMIX_KEY",
+        "OPENAI_API_KEY",
+        "OPENAI_BASE_URL",
+        "OPENAI_MODEL",
+        "BOCHA_API_KEYS",
+        "TAVILY_API_KEYS",
+        "SERPAPI_API_KEYS",
+        "TUSHARE_TOKEN",
+        "ENABLE_CHIP_DISTRIBUTION",
+        "WENCAI_COOKIE",
+        "HSCLOUD_AUTH_TOKEN",
+        "IFIND_REFRESH_TOKEN",
+        "ENABLE_THS_PRO_DATA",
+        "ENABLE_IFIND_ANALYSIS_ENHANCEMENT",
+        "TELEGRAM_BOT_TOKEN",
+        "TELEGRAM_CHAT_ID",
+        "FEISHU_WEBHOOK_URL",
+    ]:
+        assert env_name in env_vars
+        assert env_vars[env_name]["required"] is False
+
+    assert "OpenClaw Installation" in body
+    assert "openclaw skills install insight-claw" in body
+    assert "clawhub skill publish skills/hermes/insight-claw" in body
+    assert "ClawHub skill publications are distributed under MIT-0" in body
 
 
 def test_hermes_skill_guides_download_install_and_first_validation():
@@ -107,6 +152,8 @@ def test_hermes_skill_covers_github_actions_publishing_and_security_constraints(
         "GitHub Actions Secrets",
         "GitHub Actions Variables",
         "STOCK_LIST",
+        "clawhub skill publish",
+        "openclaw skills install insight-claw",
         "hermes skills publish",
         "hermes skills tap add",
         "security scanner",
