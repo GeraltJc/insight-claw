@@ -4,6 +4,10 @@
 
 即使调用 skill、插件、工具或引用英文模板，也应把面向用户的解释、问题、建议和总结输出为中文。代码、命令、文件路径、API 名称、错误信息和原文引用保持原样。
 
+## Git
+
+使用中文编写 git commit message
+
 ## Agent skills
 
 ### Issue tracker
