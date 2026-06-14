@@ -1,7 +1,7 @@
 ---
-name: insight-claw
+name: insight-claw-hermes
 description: Download, configure, run, verify, and troubleshoot Insight Claw, an A-share self-selected stock analysis pipeline.
-version: 0.1.0
+version: 0.3.1
 author: GeraltJc
 license: MIT
 platforms: [macos, linux]
@@ -49,7 +49,7 @@ For expanded commands, environment examples, GitHub Actions setup, and troublesh
 | --- | --- |
 | Download | `git clone https://github.com/GeraltJc/insight-claw.git insight-claw` |
 | Create environment | `python -m venv .venv` |
-| Install dependencies | Compare default PyPI and the Tsinghua mirror, then install with the faster successful index for this run only. |
+| Install dependencies | Download-probe default PyPI and the Tsinghua mirror, then install with the faster successful index for this run only. |
 | First validation | `.venv/bin/python -m justice_plutus run --stocks 000001,600519 --workers 1 --no-notify` |
 
 If the user is already inside an Insight Claw checkout, reuse it instead of cloning a duplicate repository.
@@ -66,8 +66,8 @@ Run this setup flow only when the Insight Claw repository or `.venv` environment
 git clone https://github.com/GeraltJc/insight-claw.git insight-claw
 cd insight-claw
 python -m venv .venv
-.venv/bin/python -m pip index versions pip --index-url https://pypi.org/simple
-.venv/bin/python -m pip index versions pip --index-url https://pypi.tuna.tsinghua.edu.cn/simple
+.venv/bin/python -m pip download --no-cache-dir --no-deps --dest /tmp/insight-claw-pip-probe-pypi --index-url https://pypi.org/simple requests==2.32.5
+.venv/bin/python -m pip download --no-cache-dir --no-deps --dest /tmp/insight-claw-pip-probe-tuna --index-url https://pypi.tuna.tsinghua.edu.cn/simple requests==2.32.5
 ```
 
 Then run exactly one dependency install command: default PyPI if it is faster, or the Tsinghua mirror if it is faster/default PyPI fails. After dependencies are installed, run the first validation:
@@ -76,11 +76,11 @@ Then run exactly one dependency install command: default PyPI if it is faster, o
 .venv/bin/python -m justice_plutus run --stocks 000001,600519 --workers 1 --no-notify
 ```
 
-Before installing dependencies, always compare default PyPI and the Tsinghua mirror:
+Before installing dependencies, always compare default PyPI and the Tsinghua mirror with an actual package download probe, not only index metadata:
 
 ```bash
-.venv/bin/python -m pip index versions pip --index-url https://pypi.org/simple
-.venv/bin/python -m pip index versions pip --index-url https://pypi.tuna.tsinghua.edu.cn/simple
+.venv/bin/python -m pip download --no-cache-dir --no-deps --dest /tmp/insight-claw-pip-probe-pypi --index-url https://pypi.org/simple requests==2.32.5
+.venv/bin/python -m pip download --no-cache-dir --no-deps --dest /tmp/insight-claw-pip-probe-tuna --index-url https://pypi.tuna.tsinghua.edu.cn/simple requests==2.32.5
 ```
 
 If default PyPI is faster or the mirror fails, install normally:
@@ -129,8 +129,8 @@ Follow the common local setup path first.
 2. If no checkout exists, confirm the user wants to use the canonical repository `https://github.com/GeraltJc/insight-claw`, ask where the project should be stored, then download it with `git clone`.
 3. Change into the repository directory.
 4. Create an isolated Python environment with `python -m venv .venv`.
-5. Before installing dependencies, compare default PyPI with `https://pypi.tuna.tsinghua.edu.cn/simple`, then install with the faster successful index for this command only. Do not persist the selected index in pip configuration.
-6. Before the first real analysis run, verify that a usable LLM credential is available through Hermes secret handling, the user's shell environment, or a user-approved local `.env` merge. If `.env` is missing and the user chooses local persistence, create it from `.env.example`; if `.env` exists, merge only missing keys or keys the user explicitly authorizes replacing. Prefer `AIHUBMIX_KEY` with OpenAI-compatible settings, or use `OPENAI_API_KEY` as fallback. Do not overwrite the whole `.env`. Do not collect, display, transmit, upload, or commit raw secret values.
+5. Before installing dependencies, compare default PyPI with `https://pypi.tuna.tsinghua.edu.cn/simple` using `pip download --no-cache-dir --no-deps`, then install with the faster successful index for this command only. Do not persist the selected index in pip configuration.
+6. Before the first real analysis run, verify that a usable LLM credential is available through Hermes secret handling, the user's shell environment, or a user-approved local `.env` merge. If `.env` is missing and the user chooses local persistence, first create it from `.env.example` with `[ -f .env ] || cp .env.example .env`; then merge only missing keys or keys the user explicitly authorizes replacing. Prefer `AIHUBMIX_KEY` with OpenAI-compatible settings, or use `OPENAI_API_KEY` as fallback. Do not overwrite the whole `.env`. Do not collect, display, transmit, upload, or commit raw secret values.
 7. Run the first validation without notifications:
 
 ```bash
@@ -208,11 +208,11 @@ Publish with the ClawHub CLI, not `hermes skills publish`, when submitting to th
 clawhub skill publish skills/hermes/insight-claw-hermes \
   --slug insight-claw-hermes \
   --name "Insight Claw Hermes" \
-  --version 0.3.0 \
-  --changelog "Publish Hermes-specific Insight Claw skill slug for ClawHub discovery."
+  --version 0.3.1 \
+  --changelog "Align skill metadata with ClawHub slug and improve setup guidance."
 ```
 
-The verified public release is `insight-claw-hermes@0.3.0`. Version this skill separately from the Insight Claw project code. Use patch bumps for wording or troubleshooting fixes, minor bumps for backward-compatible operation additions, and major bumps for changes to first-run setup, secret persistence, verification standards, or publishing boundaries.
+The verified public release is `insight-claw-hermes@0.3.0`; use `0.3.1` for the next release containing these metadata and setup guidance fixes. Version this skill separately from the Insight Claw project code. Use patch bumps for wording or troubleshooting fixes, minor bumps for backward-compatible operation additions, and major bumps for changes to first-run setup, secret persistence, verification standards, or publishing boundaries.
 
 Notes on alternate publishing paths:
 

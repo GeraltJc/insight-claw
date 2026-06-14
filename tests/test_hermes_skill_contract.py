@@ -19,9 +19,9 @@ def _load_skill():
 def test_hermes_skill_declares_public_entrypoint_metadata():
     frontmatter, body = _load_skill()
 
-    assert frontmatter["name"] == "insight-claw"
+    assert frontmatter["name"] == "insight-claw-hermes"
     assert "Insight Claw" in frontmatter["description"]
-    assert frontmatter["version"] == "0.1.0"
+    assert frontmatter["version"] == "0.3.1"
     assert frontmatter["author"]
     assert frontmatter["license"]
     assert frontmatter["platforms"] == ["macos", "linux"]
@@ -46,11 +46,13 @@ def test_hermes_skill_guides_download_install_and_first_validation():
     assert "python -m venv .venv" in body
     assert "pip install -r requirements.txt" in body
     assert "Before installing dependencies, always compare default PyPI and the Tsinghua mirror" in body
-    assert "pip index versions pip --index-url https://pypi.org/simple" in body
-    assert "pip index versions pip --index-url https://pypi.tuna.tsinghua.edu.cn/simple" in body
+    assert "pip download --no-cache-dir --no-deps" in body
+    assert "--index-url https://pypi.org/simple requests==2.32.5" in body
+    assert "--index-url https://pypi.tuna.tsinghua.edu.cn/simple requests==2.32.5" in body
     assert "Then run exactly one dependency install command" in body
     assert "Do not write global `pip.conf`, `pip.ini`, or persistent pip index settings" in body
     assert "verify that a usable LLM credential is available through Hermes secret handling" in body
+    assert "[ -f .env ] || cp .env.example .env" in body
     assert "create it from `.env.example`" in body
     assert "merge only missing keys or keys the user explicitly authorizes replacing" in body
     assert "Do not overwrite the whole `.env`" in body
@@ -126,8 +128,9 @@ def test_hermes_skill_covers_github_actions_publishing_and_security_constraints(
         "clawhub skill publish skills/hermes/insight-claw-hermes",
         "--slug insight-claw-hermes",
         "--name \"Insight Claw Hermes\"",
-        "--version 0.3.0",
+        "--version 0.3.1",
         "insight-claw-hermes@0.3.0",
+        "use `0.3.1` for the next release",
         "hermes skills publish ... --to clawhub",
         "hermes skills publish ... --to github --repo GeraltJc/insight-claw",
         "hermes skills tap add",
@@ -158,12 +161,15 @@ def test_hermes_skill_references_progressive_disclosure_files():
     assert "verify that at least one LLM credential is available through Hermes secret handling" in quickstart
     assert "Do not overwrite the whole `.env`" in quickstart
     assert "Before installing dependencies, compare default PyPI and the Tsinghua mirror" in quickstart
+    assert "pip download --no-cache-dir --no-deps" in quickstart
+    assert "[ -f .env ] || cp .env.example .env" in quickstart
     assert "https://pypi.tuna.tsinghua.edu.cn/simple" in quickstart
     assert "Do not persist this mirror selection in global pip configuration" in quickstart
     assert "python -m justice_plutus run --stocks 000001,600519 --workers 1 --no-notify" in quickstart
     assert "GitHub Actions" in quickstart
     assert "missing LLM" in troubleshooting
     assert "Never display, transmit, upload, or commit raw secret values" in troubleshooting
+    assert "does not measure wheel download speed" in troubleshooting
     assert "notification" in troubleshooting
     assert "degradation chain" in troubleshooting
     assert "should not be described as a full setup failure" in troubleshooting

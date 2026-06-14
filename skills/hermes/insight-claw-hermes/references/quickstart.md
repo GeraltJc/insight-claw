@@ -12,11 +12,11 @@ cd insight-claw
 python -m venv .venv
 ```
 
-Before installing dependencies, compare default PyPI and the Tsinghua mirror:
+Before installing dependencies, compare default PyPI and the Tsinghua mirror with an actual package download probe:
 
 ```bash
-.venv/bin/python -m pip index versions pip --index-url https://pypi.org/simple
-.venv/bin/python -m pip index versions pip --index-url https://pypi.tuna.tsinghua.edu.cn/simple
+.venv/bin/python -m pip download --no-cache-dir --no-deps --dest /tmp/insight-claw-pip-probe-pypi --index-url https://pypi.org/simple requests==2.32.5
+.venv/bin/python -m pip download --no-cache-dir --no-deps --dest /tmp/insight-claw-pip-probe-tuna --index-url https://pypi.tuna.tsinghua.edu.cn/simple requests==2.32.5
 ```
 
 If default PyPI is faster or the mirror fails, install normally:
@@ -33,7 +33,13 @@ If the Tsinghua mirror is faster or default PyPI fails, use the mirror only for 
 
 Do not persist this mirror selection in global pip configuration.
 
-Before the first real run, verify that at least one LLM credential is available through Hermes secret handling, the user's shell environment, or a user-approved local `.env` merge. If `.env` is missing and the user chooses local persistence, create it from `.env.example`; if `.env` exists, merge only missing keys or keys the user explicitly authorizes replacing. Do not overwrite the whole `.env`, and never display, transmit, upload, or commit raw secret values.
+Before the first real run, verify that at least one LLM credential is available through Hermes secret handling, the user's shell environment, or a user-approved local `.env` merge. If `.env` is missing and the user chooses local persistence, first create it from `.env.example`:
+
+```bash
+[ -f .env ] || cp .env.example .env
+```
+
+Then merge only missing keys or keys the user explicitly authorizes replacing. Do not overwrite the whole `.env`, and never display, transmit, upload, or commit raw secret values.
 
 ```dotenv
 AIHUBMIX_KEY=

@@ -7,6 +7,7 @@ This note records the verified release path for publishing the Insight Claw Herm
 - ClawHub slug: `insight-claw-hermes`
 - Display name: `Insight Claw Hermes`
 - Verified published version: `insight-claw-hermes@0.3.0`
+- Next recommended version for metadata/setup fixes: `0.3.1`
 - Local skill directory: `skills/hermes/insight-claw-hermes`
 - Verified publish tool: ClawHub CLI
 
@@ -43,14 +44,14 @@ clawhub skill publish skills/hermes/insight-claw-hermes \
   --changelog "<release notes>"
 ```
 
-Example of the verified 0.3.0 release:
+Example for the next 0.3.1 release:
 
 ```bash
 clawhub skill publish skills/hermes/insight-claw-hermes \
   --slug insight-claw-hermes \
   --name "Insight Claw Hermes" \
-  --version 0.3.0 \
-  --changelog "Publish Hermes-specific Insight Claw skill slug for ClawHub discovery."
+  --version 0.3.1 \
+  --changelog "Align skill metadata with ClawHub slug and improve setup guidance."
 ```
 
 Do not reuse a published version. Bump the semver version for each new ClawHub release.
