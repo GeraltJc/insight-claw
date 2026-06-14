@@ -22,13 +22,13 @@ git status --short --branch
 Confirm ClawHub login:
 
 ```bash
-/Users/jc/.hermes/node/bin/clawhub whoami
+clawhub whoami
 ```
 
 If login is missing or expired, use device-code login:
 
 ```bash
-/Users/jc/.hermes/node/bin/clawhub login --device
+clawhub login --device
 ```
 
 ## Publish
@@ -36,7 +36,7 @@ If login is missing or expired, use device-code login:
 Use the ClawHub CLI directly:
 
 ```bash
-/Users/jc/.hermes/node/bin/clawhub skill publish skills/hermes/insight-claw-hermes \
+clawhub skill publish skills/hermes/insight-claw-hermes \
   --slug insight-claw-hermes \
   --name "Insight Claw Hermes" \
   --version <semver-version> \
@@ -46,7 +46,7 @@ Use the ClawHub CLI directly:
 Example of the verified 0.3.0 release:
 
 ```bash
-/Users/jc/.hermes/node/bin/clawhub skill publish skills/hermes/insight-claw-hermes \
+clawhub skill publish skills/hermes/insight-claw-hermes \
   --slug insight-claw-hermes \
   --name "Insight Claw Hermes" \
   --version 0.3.0 \
@@ -60,8 +60,8 @@ Do not reuse a published version. Bump the semver version for each new ClawHub r
 After publishing, verify the listing:
 
 ```bash
-/Users/jc/.hermes/node/bin/clawhub search insight-claw-hermes
-/Users/jc/.hermes/node/bin/clawhub inspect insight-claw-hermes
+clawhub search insight-claw-hermes
+clawhub inspect insight-claw-hermes
 ```
 
 Expected successful publish output shape:
@@ -89,8 +89,8 @@ These paths are not the verified direct ClawHub publishing path:
 
 ## Common Failures
 
-- `clawhub: command not found`: use `/Users/jc/.hermes/node/bin/clawhub` or install the ClawHub CLI.
-- Expired login: run `/Users/jc/.hermes/node/bin/clawhub login --device`.
+- `clawhub: command not found`: locate the CLI with `command -v clawhub`, add it to `PATH`, or install the ClawHub CLI.
+- Expired login: run `clawhub login --device`.
 - Version already exists: bump `--version`.
 - Network or DNS failure in Codex sandbox: rerun the command with escalated permissions.
 - Moderation is not immediately final: inspect the listing again after scan completion.
