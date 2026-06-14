@@ -10,10 +10,30 @@ First-time setup:
 git clone https://github.com/GeraltJc/insight-claw.git insight-claw
 cd insight-claw
 python -m venv .venv
+```
+
+Before installing dependencies, compare default PyPI and the Tsinghua mirror:
+
+```bash
+.venv/bin/python -m pip index versions pip --index-url https://pypi.org/simple
+.venv/bin/python -m pip index versions pip --index-url https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+If default PyPI is faster or the mirror fails, install normally:
+
+```bash
 .venv/bin/python -m pip install -r requirements.txt
 ```
 
-Configure at least one LLM key path before a real run:
+If the Tsinghua mirror is faster or default PyPI fails, use the mirror only for the current install:
+
+```bash
+.venv/bin/python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+Do not persist this mirror selection in global pip configuration.
+
+After user approval, persist at least one LLM key path in the local `.env` before the first real run. If `.env` is missing, create it from `.env.example`; if `.env` exists, merge only missing keys or keys the user explicitly authorizes replacing. Do not overwrite the whole `.env`.
 
 ```dotenv
 AIHUBMIX_KEY=

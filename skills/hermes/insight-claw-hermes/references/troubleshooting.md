@@ -10,6 +10,8 @@ A missing LLM key blocks real structured analysis. Ask the user to configure `AI
 
 Confirm Python 3.11+ is available, the virtual environment is active or explicitly addressed through `.venv/bin/python`, and dependencies are installed from `requirements.txt`.
 
+The setup flow compares default PyPI with the Tsinghua mirror before dependency installation. If package index access is slow or failing, rerun that comparison with `pip index versions pip --index-url ...`, then retry with `-i https://pypi.tuna.tsinghua.edu.cn/simple` only for the current install command when the mirror is faster or default PyPI fails. Do not write global pip configuration.
+
 ## Data Provider Gaps
 
 Some 行情数据 sources may fail or be rate-limited. Treat this as possible degradation chain behavior until every configured provider has failed.

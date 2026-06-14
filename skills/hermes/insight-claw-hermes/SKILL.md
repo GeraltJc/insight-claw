@@ -49,7 +49,7 @@ For expanded commands, environment examples, GitHub Actions setup, and troublesh
 | --- | --- |
 | Download | `git clone https://github.com/GeraltJc/insight-claw.git insight-claw` |
 | Create environment | `python -m venv .venv` |
-| Install dependencies | `.venv/bin/python -m pip install -r requirements.txt` (`pip install -r requirements.txt` inside the activated environment) |
+| Install dependencies | Compare default PyPI and the Tsinghua mirror, then install with the faster successful index for this run only. |
 | First validation | `.venv/bin/python -m justice_plutus run --stocks 000001,600519 --workers 1 --no-notify` |
 
 If the user is already inside an Insight Claw checkout, reuse it instead of cloning a duplicate repository.
@@ -60,15 +60,42 @@ Hermes should not clone and reinstall on every request. Use this decision flow:
 
 ### First-time setup
 
-Run these commands only when the Insight Claw repository or `.venv` environment is missing:
+Run this setup flow only when the Insight Claw repository or `.venv` environment is missing:
 
 ```bash
 git clone https://github.com/GeraltJc/insight-claw.git insight-claw
 cd insight-claw
 python -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m pip index versions pip --index-url https://pypi.org/simple
+.venv/bin/python -m pip index versions pip --index-url https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+Then run exactly one dependency install command: default PyPI if it is faster, or the Tsinghua mirror if it is faster/default PyPI fails. After dependencies are installed, run the first validation:
+
+```bash
 .venv/bin/python -m justice_plutus run --stocks 000001,600519 --workers 1 --no-notify
 ```
+
+Before installing dependencies, always compare default PyPI and the Tsinghua mirror:
+
+```bash
+.venv/bin/python -m pip index versions pip --index-url https://pypi.org/simple
+.venv/bin/python -m pip index versions pip --index-url https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+If default PyPI is faster or the mirror fails, install normally:
+
+```bash
+.venv/bin/python -m pip install -r requirements.txt
+```
+
+If the Tsinghua mirror is faster or default PyPI fails, use the mirror only for the current install command:
+
+```bash
+.venv/bin/python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+Do not write global `pip.conf`, `pip.ini`, or persistent pip index settings from this skill.
 
 ### Subsequent runs
 
@@ -79,7 +106,9 @@ cd insight-claw
 .venv/bin/python -m justice_plutus run --stocks 000001,600519 --workers 1 --no-notify
 ```
 
-Reinstall dependencies only after project updates, `requirements.txt` changes, or virtual environment failure.
+Do not automatically run `git pull` in an existing checkout. Reuse the local repository as-is unless the user explicitly asks for an update, or a failed run is traced to version or dependency drift. Before updating, inspect the local worktree state and ask for user approval.
+
+Reinstall dependencies only after approved project updates, `requirements.txt` changes, or virtual environment failure.
 
 ## Runtime Requirements
 
@@ -90,7 +119,7 @@ Before running Insight Claw, confirm these requirements:
 - `pip`
 - `venv`
 - Network access for dependency installation and configured data, search, LLM, or notification providers.
-- At least one LLM key for real structured analysis. Prefer `AIHUBMIX_KEY`; use `OPENAI_API_KEY` as fallback or primary key when appropriate.
+- Require at least one LLM key for real structured analysis, persisted in the local `.env` after user approval. Prefer `AIHUBMIX_KEY`; use `OPENAI_API_KEY` as fallback or primary key when appropriate.
 
 ## Procedure
 
@@ -100,8 +129,8 @@ Follow the common local setup path first.
 2. If no checkout exists, ask where the user wants the project stored, then download it from `https://github.com/GeraltJc/insight-claw` with `git clone`.
 3. Change into the repository directory.
 4. Create an isolated Python environment with `python -m venv .venv`.
-5. Install dependencies with `pip install -r requirements.txt` from inside the isolated environment.
-6. Configure at least one LLM key path before a real analysis run. Prefer `AIHUBMIX_KEY` with OpenAI-compatible settings, or use `OPENAI_API_KEY` as fallback.
+5. Before installing dependencies, compare default PyPI with `https://pypi.tuna.tsinghua.edu.cn/simple`, then install with the faster successful index for this command only. Do not persist the selected index in pip configuration.
+6. Ask the user for approval to persist required LLM configuration in the local `.env` file before the first real analysis run. If `.env` is missing, create it from `.env.example`; if `.env` exists, merge only missing keys or keys the user explicitly authorizes replacing. Prefer `AIHUBMIX_KEY` with OpenAI-compatible settings, or use `OPENAI_API_KEY` as fallback. Do not overwrite the whole `.env`. Do not print raw secret values back to the conversation, upload `.env`, or add `.env` to version control.
 7. Run the first validation without notifications:
 
 ```bash
@@ -167,16 +196,19 @@ Use GitHub Actions only after the local flow is understood.
 - Data-source failures may be normal degradation chain behavior. Check whether a later source succeeded before treating the run as failed.
 - Notification failures should be isolated from report generation. Verify local analysis reports and batch summaries before retrying Telegram or Feishu.
 - Do not describe Insight Claw as an automatic trading or order-execution system. It produces decision results for user review.
+- Do not generate independent investment advice from this skill. If summarizing results, ground the summary in generated analysis reports or batch summaries and keep it distinct from the pipeline's decision result.
 
-## Publishing
+## Expected Publishing Path
 
 This skill is intended for public Hermes distribution. Keep the bundle small: `SKILL.md` plus optional text references or small helper scripts only when they remove real repeated work.
 
-To publish to a Skills Hub:
+Before publishing, verify the Hermes and ClawHub CLI contract in the target environment. The expected publish command is:
 
 ```bash
-hermes skills publish skills/hermes/insight-claw --to github --repo GeraltJc/insight-claw
+hermes skills publish skills/hermes/insight-claw-hermes --to github --repo GeraltJc/insight-claw
 ```
+
+Version this skill separately from the Insight Claw project code. Keep `0.1.0` for the first public release. Use patch bumps for wording or troubleshooting fixes, minor bumps for backward-compatible operation additions, and major bumps for changes to first-run setup, secret persistence, verification standards, or publishing boundaries.
 
 To expose the repository as a custom tap:
 

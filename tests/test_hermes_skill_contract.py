@@ -3,7 +3,7 @@ from pathlib import Path
 import yaml
 
 
-SKILL_DIR = Path("skills/hermes/insight-claw")
+SKILL_DIR = Path("skills/hermes/insight-claw-hermes")
 SKILL_FILE = SKILL_DIR / "SKILL.md"
 QUICKSTART_FILE = SKILL_DIR / "references" / "quickstart.md"
 TROUBLESHOOTING_FILE = SKILL_DIR / "references" / "troubleshooting.md"
@@ -30,6 +30,7 @@ def test_hermes_skill_declares_public_entrypoint_metadata():
     assert "Quick Reference" in body
     assert "Procedure" in body
     assert "Verification" in body
+    assert "Version this skill separately from the Insight Claw project code" in body
 
 
 def test_hermes_skill_guides_download_install_and_first_validation():
@@ -39,11 +40,25 @@ def test_hermes_skill_guides_download_install_and_first_validation():
     assert "git clone" in body
     assert "First-time setup" in body
     assert "Subsequent runs" in body
+    assert "Do not automatically run `git pull`" in body
+    assert "inspect the local worktree state and ask for user approval" in body
     assert "Python 3.11+" in body
     assert "python -m venv .venv" in body
     assert "pip install -r requirements.txt" in body
+    assert "Before installing dependencies, always compare default PyPI and the Tsinghua mirror" in body
+    assert "pip index versions pip --index-url https://pypi.org/simple" in body
+    assert "pip index versions pip --index-url https://pypi.tuna.tsinghua.edu.cn/simple" in body
+    assert "Then run exactly one dependency install command" in body
+    assert "Do not write global `pip.conf`, `pip.ini`, or persistent pip index settings" in body
+    assert "approval to persist required LLM configuration in the local `.env`" in body
+    assert "create it from `.env.example`" in body
+    assert "merge only missing keys or keys the user explicitly authorizes replacing" in body
+    assert "Do not overwrite the whole `.env`" in body
+    assert "Do not print raw secret values" in body
     assert ".venv/bin/python -m justice_plutus run --stocks 000001,600519 --workers 1 --no-notify" in body
     assert "python -m justice_plutus run --stocks 000001,600519 --workers 1 --no-notify" in body
+    assert "Use `--stocks` for a temporary self-selected stock override" in body
+    assert "It does not mutate the persistent `STOCK_LIST` configuration" in body
     assert "reports/YYYY-MM-DD/stocks/<code>.md" in body
     assert "reports/YYYY-MM-DD/summary.md" in body
 
@@ -104,16 +119,18 @@ def test_hermes_skill_covers_github_actions_publishing_and_security_constraints(
 
     for phrase in [
         "workflow_dispatch",
+        "Use GitHub Actions only after the local flow is understood",
         "GitHub Actions Secrets",
         "GitHub Actions Variables",
         "STOCK_LIST",
-        "hermes skills publish",
+        "hermes skills publish skills/hermes/insight-claw-hermes --to github --repo GeraltJc/insight-claw",
         "hermes skills tap add",
         "security scanner",
         "Data exfiltration",
         "Prompt injection",
         "Destructive commands",
         "Shell injection",
+        "Do not generate independent investment advice from this skill",
     ]:
         assert phrase in body
 
@@ -132,8 +149,20 @@ def test_hermes_skill_references_progressive_disclosure_files():
 
     assert "references/quickstart.md" in body
     assert "references/troubleshooting.md" in body
+    assert "After user approval, persist at least one LLM key path in the local `.env`" in quickstart
+    assert "Do not overwrite the whole `.env`" in quickstart
+    assert "Before installing dependencies, compare default PyPI and the Tsinghua mirror" in quickstart
+    assert "https://pypi.tuna.tsinghua.edu.cn/simple" in quickstart
+    assert "Do not persist this mirror selection in global pip configuration" in quickstart
     assert "python -m justice_plutus run --stocks 000001,600519 --workers 1 --no-notify" in quickstart
     assert "GitHub Actions" in quickstart
     assert "missing LLM" in troubleshooting
     assert "notification" in troubleshooting
     assert "degradation chain" in troubleshooting
+    assert "should not be described as a full setup failure" in troubleshooting
+    assert "explicit user approval" in troubleshooting
+    assert "Do not write global pip configuration" in troubleshooting
+
+
+def test_hermes_skill_bundle_stays_small_without_helper_scripts():
+    assert not (SKILL_DIR / "scripts").exists()
