@@ -4,7 +4,7 @@ Use this reference after the main no-notification validation path fails or produ
 
 ## Missing LLM Configuration
 
-A missing LLM key blocks real structured analysis. Ask the user to configure `AIHUBMIX_KEY` or `OPENAI_API_KEY` securely. Do not print raw secret values back to the user.
+A missing LLM credential blocks real structured analysis. Use Hermes secret handling, the user's existing environment, or a user-approved local `.env` merge for `AIHUBMIX_KEY` or `OPENAI_API_KEY`. Never display, transmit, upload, or commit raw secret values.
 
 ## Dependency Installation Fails
 

@@ -50,11 +50,11 @@ def test_hermes_skill_guides_download_install_and_first_validation():
     assert "pip index versions pip --index-url https://pypi.tuna.tsinghua.edu.cn/simple" in body
     assert "Then run exactly one dependency install command" in body
     assert "Do not write global `pip.conf`, `pip.ini`, or persistent pip index settings" in body
-    assert "approval to persist required LLM configuration in the local `.env`" in body
+    assert "verify that a usable LLM credential is available through Hermes secret handling" in body
     assert "create it from `.env.example`" in body
     assert "merge only missing keys or keys the user explicitly authorizes replacing" in body
     assert "Do not overwrite the whole `.env`" in body
-    assert "Do not print raw secret values" in body
+    assert "Do not collect, display, transmit, upload, or commit raw secret values" in body
     assert ".venv/bin/python -m justice_plutus run --stocks 000001,600519 --workers 1 --no-notify" in body
     assert "python -m justice_plutus run --stocks 000001,600519 --workers 1 --no-notify" in body
     assert "Use `--stocks` for a temporary self-selected stock override" in body
@@ -71,7 +71,7 @@ def test_hermes_skill_runtime_requirements_do_not_name_operating_systems():
     assert "git" in body
     assert "pip" in body
     assert "venv" in body
-    assert "at least one LLM key" in body
+    assert "at least one local LLM credential reference" in body
     assert "macOS/Linux" not in body
 
 
@@ -149,7 +149,7 @@ def test_hermes_skill_references_progressive_disclosure_files():
 
     assert "references/quickstart.md" in body
     assert "references/troubleshooting.md" in body
-    assert "After user approval, persist at least one LLM key path in the local `.env`" in quickstart
+    assert "verify that at least one LLM credential is available through Hermes secret handling" in quickstart
     assert "Do not overwrite the whole `.env`" in quickstart
     assert "Before installing dependencies, compare default PyPI and the Tsinghua mirror" in quickstart
     assert "https://pypi.tuna.tsinghua.edu.cn/simple" in quickstart
@@ -157,6 +157,7 @@ def test_hermes_skill_references_progressive_disclosure_files():
     assert "python -m justice_plutus run --stocks 000001,600519 --workers 1 --no-notify" in quickstart
     assert "GitHub Actions" in quickstart
     assert "missing LLM" in troubleshooting
+    assert "Never display, transmit, upload, or commit raw secret values" in troubleshooting
     assert "notification" in troubleshooting
     assert "degradation chain" in troubleshooting
     assert "should not be described as a full setup failure" in troubleshooting

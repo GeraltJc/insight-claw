@@ -33,7 +33,7 @@ If the Tsinghua mirror is faster or default PyPI fails, use the mirror only for 
 
 Do not persist this mirror selection in global pip configuration.
 
-After user approval, persist at least one LLM key path in the local `.env` before the first real run. If `.env` is missing, create it from `.env.example`; if `.env` exists, merge only missing keys or keys the user explicitly authorizes replacing. Do not overwrite the whole `.env`.
+Before the first real run, verify that at least one LLM credential is available through Hermes secret handling, the user's shell environment, or a user-approved local `.env` merge. If `.env` is missing and the user chooses local persistence, create it from `.env.example`; if `.env` exists, merge only missing keys or keys the user explicitly authorizes replacing. Do not overwrite the whole `.env`, and never display, transmit, upload, or commit raw secret values.
 
 ```dotenv
 AIHUBMIX_KEY=

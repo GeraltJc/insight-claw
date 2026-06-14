@@ -119,18 +119,18 @@ Before running Insight Claw, confirm these requirements:
 - `pip`
 - `venv`
 - Network access for dependency installation and configured data, search, LLM, or notification providers.
-- Require at least one LLM key for real structured analysis, persisted in the local `.env` after user approval. Prefer `AIHUBMIX_KEY`; use `OPENAI_API_KEY` as fallback or primary key when appropriate.
+- Require at least one local LLM credential reference for real structured analysis. Prefer an existing `AIHUBMIX_KEY`; use `OPENAI_API_KEY` as fallback or primary key when appropriate. Secrets must stay local to the user's checkout or Hermes secret handling.
 
 ## Procedure
 
 Follow the common local setup path first.
 
 1. Locate an existing checkout by looking for `justice_plutus/`, `src/`, and `requirements.txt` in the working tree.
-2. If no checkout exists, ask where the user wants the project stored, then download it from `https://github.com/GeraltJc/insight-claw` with `git clone`.
+2. If no checkout exists, confirm the user wants to use the canonical repository `https://github.com/GeraltJc/insight-claw`, ask where the project should be stored, then download it with `git clone`.
 3. Change into the repository directory.
 4. Create an isolated Python environment with `python -m venv .venv`.
 5. Before installing dependencies, compare default PyPI with `https://pypi.tuna.tsinghua.edu.cn/simple`, then install with the faster successful index for this command only. Do not persist the selected index in pip configuration.
-6. Ask the user for approval to persist required LLM configuration in the local `.env` file before the first real analysis run. If `.env` is missing, create it from `.env.example`; if `.env` exists, merge only missing keys or keys the user explicitly authorizes replacing. Prefer `AIHUBMIX_KEY` with OpenAI-compatible settings, or use `OPENAI_API_KEY` as fallback. Do not overwrite the whole `.env`. Do not print raw secret values back to the conversation, upload `.env`, or add `.env` to version control.
+6. Before the first real analysis run, verify that a usable LLM credential is available through Hermes secret handling, the user's shell environment, or a user-approved local `.env` merge. If `.env` is missing and the user chooses local persistence, create it from `.env.example`; if `.env` exists, merge only missing keys or keys the user explicitly authorizes replacing. Prefer `AIHUBMIX_KEY` with OpenAI-compatible settings, or use `OPENAI_API_KEY` as fallback. Do not overwrite the whole `.env`. Do not collect, display, transmit, upload, or commit raw secret values.
 7. Run the first validation without notifications:
 
 ```bash
@@ -191,7 +191,7 @@ Use GitHub Actions only after the local flow is understood.
 
 ## Pitfalls
 
-- Missing LLM keys block real structured analysis. Ask the user to configure a key securely; do not print raw secret values back to the conversation.
+- Missing LLM credentials block real structured analysis. Use Hermes secret handling, the user's existing environment, or a user-approved local `.env` merge. Never collect, display, transmit, upload, or commit raw secret values.
 - Missing search, chip distribution, or 同花顺专业数据模式 credentials should be explained as optional enhancement gaps when the core run can still proceed.
 - Data-source failures may be normal degradation chain behavior. Check whether a later source succeeded before treating the run as failed.
 - Notification failures should be isolated from report generation. Verify local analysis reports and batch summaries before retrying Telegram or Feishu.
