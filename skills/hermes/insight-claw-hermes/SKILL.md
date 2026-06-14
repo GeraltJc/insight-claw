@@ -198,17 +198,26 @@ Use GitHub Actions only after the local flow is understood.
 - Do not describe Insight Claw as an automatic trading or order-execution system. It produces decision results for user review.
 - Do not generate independent investment advice from this skill. If summarizing results, ground the summary in generated analysis reports or batch summaries and keep it distinct from the pipeline's decision result.
 
-## Expected Publishing Path
+## ClawHub Publishing
 
 This skill is intended for public Hermes distribution. Keep the bundle small: `SKILL.md` plus optional text references or small helper scripts only when they remove real repeated work.
 
-Before publishing, verify the Hermes and ClawHub CLI contract in the target environment. The expected publish command is:
+Publish with the ClawHub CLI, not `hermes skills publish`, when submitting to the public ClawHub registry:
 
 ```bash
-hermes skills publish skills/hermes/insight-claw-hermes --to github --repo GeraltJc/insight-claw
+clawhub skill publish skills/hermes/insight-claw-hermes \
+  --slug insight-claw-hermes \
+  --name "Insight Claw Hermes" \
+  --version 0.3.0 \
+  --changelog "Publish Hermes-specific Insight Claw skill slug for ClawHub discovery."
 ```
 
-Version this skill separately from the Insight Claw project code. Keep `0.1.0` for the first public release. Use patch bumps for wording or troubleshooting fixes, minor bumps for backward-compatible operation additions, and major bumps for changes to first-run setup, secret persistence, verification standards, or publishing boundaries.
+The verified public release is `insight-claw-hermes@0.3.0`. Version this skill separately from the Insight Claw project code. Use patch bumps for wording or troubleshooting fixes, minor bumps for backward-compatible operation additions, and major bumps for changes to first-run setup, secret persistence, verification standards, or publishing boundaries.
+
+Notes on alternate publishing paths:
+
+- `hermes skills publish ... --to clawhub` currently reports that ClawHub publishing is not yet supported.
+- `hermes skills publish ... --to github --repo GeraltJc/insight-claw` creates a GitHub submission PR instead of directly publishing to ClawHub.
 
 To expose the repository as a custom tap:
 
